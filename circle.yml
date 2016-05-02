@@ -15,5 +15,6 @@ dependencies:
 test:
   override:
     - bundle exec rspec
+    - bundle exec rspec --tag functional spec/functional/producer_spec.rb:10
   post:
     - cp *.log $CIRCLE_ARTIFACTS/ || true
