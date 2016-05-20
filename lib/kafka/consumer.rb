@@ -96,8 +96,8 @@ module Kafka
     #   returning messages from the server, in seconds.
     # @yieldparam message [Kafka::FetchedMessage] a message fetched from Kafka.
     # @return [nil]
-    def each_message(min_bytes: 1, max_wait_time: 5)
-      consumer_loop do
+    def each_message(min_bytes: 1, max_wait_time: 5, loop_count: nil)
+      consumer_loop(loop_count) do
         batches = fetch_batches(min_bytes: min_bytes, max_wait_time: max_wait_time)
 
         batches.each do |batch|
@@ -175,10 +175,17 @@ module Kafka
 
     private
 
-    def consumer_loop
+    def consumer_loop(loop_count = nil)
       @running = true
+      counter = 0
 
-      while @running
+      while @running && (loop_count.nil? || counter < loop_count)
+        counter += 1
+        if !loop_count.nil? && counter >= loop_count
+          @logger.
+            debug("Will exit as loop limit has been reached: #{loop_count}")
+        end
+
         begin
           yield
         rescue HeartbeatError, OffsetCommitError, FetchError
