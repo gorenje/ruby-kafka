@@ -144,8 +144,8 @@ module Kafka
     #   returning messages from the server, in seconds.
     # @yieldparam batch [Kafka::FetchedBatch] a message batch fetched from Kafka.
     # @return [nil]
-    def each_batch(min_bytes: 1, max_wait_time: 5)
-      consumer_loop do
+    def each_batch(min_bytes: 1, max_wait_time: 5, loop_count: nil)
+      consumer_loop(loop_count) do
         batches = fetch_batches(min_bytes: min_bytes, max_wait_time: max_wait_time)
 
         batches.each do |batch|
